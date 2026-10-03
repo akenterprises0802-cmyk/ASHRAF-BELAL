@@ -18,8 +18,8 @@ export const INITIAL_USERS: UserAccount[] = [
   {
     id: 'usr_admin',
     username: 'admin',
-    password: 'admin123',
-    fullName: 'Mohammad Tariq (Admin)',
+    password: 'admin@gloziyo',
+    fullName: 'System Administrator',
     email: 'admin@gloziyo.com',
     mobile: '9820112233',
     role: 'Admin',
@@ -28,8 +28,8 @@ export const INITIAL_USERS: UserAccount[] = [
   {
     id: 'usr_hr',
     username: 'hr',
-    password: 'hr123',
-    fullName: 'Shabana Khan (HR Manager)',
+    password: 'hr@gloziyo',
+    fullName: 'HR Manager',
     email: 'hr@gloziyo.com',
     mobile: '9892334455',
     role: 'HR',
@@ -38,8 +38,8 @@ export const INITIAL_USERS: UserAccount[] = [
   {
     id: 'usr_staff',
     username: 'staff',
-    password: 'staff123',
-    fullName: 'Rahul Verma (Data Operator)',
+    password: 'staff@gloziyo',
+    fullName: 'Staff Operator',
     email: 'staff@gloziyo.com',
     mobile: '9870556677',
     role: 'Staff',
@@ -47,24 +47,28 @@ export const INITIAL_USERS: UserAccount[] = [
   },
 ];
 
-// Clean empty statutory registers for real production usage (no demo data)
+// Clean empty statutory registers for real production usage (zero demo data)
 export const INITIAL_EMPLOYEES: EmployeeRecord[] = [];
 
 export const INITIAL_RECOVERIES: RecoveryRecord[] = [];
 
 export const INITIAL_ATTENDANCE: AttendanceRecord[] = [];
 
-// Local Storage Keys (v_clean represents pristine production state with 0 demo data)
-const USERS_KEY = 'gloziyo_users_v2';
+// Local Storage Keys (v3 represents clean production state with no demo data and no passwords)
+const USERS_KEY = 'gloziyo_users_v3_clean';
 const EMPLOYEES_KEY = 'gloziyo_employees_live_clean';
 const RECOVERIES_KEY = 'gloziyo_recoveries_live_clean';
 const ATTENDANCE_KEY = 'gloziyo_attendance_live_clean';
 const DESIGNATIONS_KEY = 'gloziyo_designations_v2';
 const QUALIFICATIONS_KEY = 'gloziyo_qualifications_v2';
-const CURRENT_USER_KEY = 'gloziyo_current_user_v2';
+const CURRENT_USER_KEY = 'gloziyo_current_user_v3';
 
 // Purge legacy demo localStorage caches on load
 try {
+  localStorage.removeItem('gloziyo_users_v2');
+  localStorage.removeItem('gloziyo_users_v1');
+  localStorage.removeItem('gloziyo_current_user_v2');
+  localStorage.removeItem('gloziyo_current_user_v1');
   localStorage.removeItem('gloziyo_employees_v2');
   localStorage.removeItem('gloziyo_recoveries_v2');
   localStorage.removeItem('gloziyo_attendance_v3');
@@ -82,7 +86,12 @@ export function getStoredUsers(): UserAccount[] {
       localStorage.setItem(USERS_KEY, JSON.stringify(INITIAL_USERS));
       return INITIAL_USERS;
     }
-    return JSON.parse(raw);
+    const parsed: UserAccount[] = JSON.parse(raw);
+    const secured = parsed.map((u) => ({
+      ...u,
+      password: u.password && u.password.trim() !== '' ? u.password : `${u.username}@gloziyo`,
+    }));
+    return secured;
   } catch {
     return INITIAL_USERS;
   }

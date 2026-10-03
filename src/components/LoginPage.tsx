@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UserAccount, UserRole, ESTABLISHMENT_DETAILS } from '../types';
+import { UserAccount, ESTABLISHMENT_DETAILS } from '../types';
 import { CompanyLogo } from './CompanyLogo';
 import {
   Lock,
@@ -12,23 +12,25 @@ import {
   Mail,
   Send,
   X,
-  Info,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 
 interface LoginPageProps {
   users: UserAccount[];
   onLoginSuccess: (user: UserAccount) => void;
-  onResetPasswordExternal: (userId: string, newPass: string) => void;
+  onSetPassword?: (userId: string, newPass: string) => void;
 }
 
 export const LoginPage: React.FC<LoginPageProps> = ({
   users,
   onLoginSuccess,
-  onResetPasswordExternal,
+  onSetPassword,
 }) => {
-  const [username, setUsername] = useState('admin');
-  const [password, setPassword] = useState('admin123');
-  const [selectedRole, setSelectedRole] = useState<UserRole>('Admin');
+  // Login Form States (clean, no demo data pre-filled)
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
   // Forgot Password modal state
@@ -46,70 +48,73 @@ export const LoginPage: React.FC<LoginPageProps> = ({
     setErrorMessage('');
 
     const trimmedUser = username.trim().toLowerCase();
-    const user = users.find(
-      (u) =>
-        (u.username.toLowerCase() === trimmedUser || u.email.toLowerCase() === trimmedUser) &&
-        u.password === password
-    );
-
-    if (!user) {
-      setErrorMessage('Invalid username or password. Please verify credentials.');
+    if (!trimmedUser) {
+      setErrorMessage('Please enter your username or registered email.');
       return;
     }
 
-    if (user.role !== selectedRole) {
-      setErrorMessage(
-        `Role mismatch: User "@${user.username}" is designated as [${user.role}], but you selected [${selectedRole}].`
-      );
+    if (!password) {
+      setErrorMessage('Password is required. All accounts are strictly password-protected.');
+      return;
+    }
+
+    // Find user
+    const user = users.find(
+      (u) =>
+        u.username.toLowerCase() === trimmedUser ||
+        u.email.toLowerCase() === trimmedUser
+    );
+
+    if (!user) {
+      setErrorMessage('Account not found. Please verify your username or registered email.');
+      return;
+    }
+
+    // Check Password strictly
+    if (user.password !== password) {
+      setErrorMessage('Incorrect password. Please try again or use "Forgot Password" to reset.');
       return;
     }
 
     onLoginSuccess(user);
   };
 
-  const handleQuickFill = (u: string, p: string, r: UserRole) => {
-    setUsername(u);
-    setPassword(p);
-    setSelectedRole(r);
-    setErrorMessage('');
-  };
-
-  // Forgot password initiated
+  // Forgot Password Initiated via Email
   const handleInitiateForgot = (e: React.FormEvent) => {
     e.preventDefault();
     setForgotError('');
 
     const query = forgotInput.trim().toLowerCase();
+    if (!query) {
+      setForgotError('Please enter your username or registered email ID.');
+      return;
+    }
+
     const targetUser = users.find(
-      (u) => u.username.toLowerCase() === query || u.email.toLowerCase() === query
+      (u) =>
+        u.username.toLowerCase() === query ||
+        u.email.toLowerCase() === query
     );
 
     if (!targetUser) {
-      setForgotError('No registered user account found with that username or email ID.');
+      setForgotError('No registered account found with that username or email ID.');
       return;
     }
 
-    // STRICT REQUIREMENT: Remove the Password forget Option from Staff
-    if (targetUser.role === 'Staff') {
-      setForgotError(
-        'Self-service Password Reset is strictly disabled for Staff accounts. Please contact your System Administrator to reset your password.'
-      );
-      return;
-    }
-
-    // Admin & HR allowed
+    // Generate random 6-digit OTP code
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     setMatchedForgotUser(targetUser);
     setSimulatedOtp(code);
     setForgotStep('otp');
   };
 
+  // Verify OTP and Save New Password
   const handleVerifyOtpAndReset = (e: React.FormEvent) => {
     e.preventDefault();
     setForgotError('');
 
     if (enteredOtp.trim() !== simulatedOtp) {
-      setForgotError('Invalid verification code. Please check the simulated email dispatch below.');
+      setForgotError('Invalid verification code. Please enter the 6-digit OTP shown in the dispatch notice.');
       return;
     }
 
@@ -118,8 +123,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({
       return;
     }
 
-    if (matchedForgotUser) {
-      onResetPasswordExternal(matchedForgotUser.id, newPassword.trim());
+    if (matchedForgotUser && onSetPassword) {
+      onSetPassword(matchedForgotUser.id, newPassword.trim());
       setForgotStep('success');
     }
   };
@@ -143,7 +148,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({
       <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-indigo-600/15 rounded-full blur-3xl pointer-events-none"></div>
 
       <div className="max-w-md w-full relative z-10">
-        {/* Establishment Card Top Seal */}
+        {/* Establishment Header Seal */}
         <div className="text-center mb-6">
           <div className="inline-flex justify-center mb-3">
             <CompanyLogo size="xl" showText={false} />
@@ -159,14 +164,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           </p>
         </div>
 
-        {/* Login Box */}
+        {/* Login Card */}
         <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 p-6 sm:p-8">
           <div className="text-center mb-6">
             <h2 className="text-xl font-extrabold text-slate-900">
               Employee Management Portal
             </h2>
             <p className="text-xs text-slate-500 mt-1">
-              Role-Based Access for Statutory Registers (Form A, Form C, Form D)
+              Secure Password-Protected Access for Statutory Registers
             </p>
           </div>
 
@@ -178,29 +183,30 @@ export const LoginPage: React.FC<LoginPageProps> = ({
           )}
 
           <form onSubmit={handleLogin} className="space-y-4">
-            {/* Username */}
+            {/* Username or Email */}
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">
-                Username or Email
+                Username or Registered Email *
               </label>
               <div className="relative">
                 <User className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
                 <input
                   type="text"
                   required
-                  placeholder="Username"
+                  placeholder="Enter your username or email"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-medium text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-blue-600"
+                  className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-blue-600"
                 />
               </div>
             </div>
 
-            {/* Password */}
+            {/* Password with Forgot Password link */}
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="text-xs font-bold text-slate-700">Password</label>
-                {/* Forget Password link - only for Admin and HR */}
+                <label className="text-xs font-bold text-slate-700">
+                  Password *
+                </label>
                 <button
                   type="button"
                   onClick={() => setShowForgotModal(true)}
@@ -212,92 +218,34 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               <div className="relative">
                 <Lock className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   required
-                  placeholder="Password"
+                  placeholder="Enter your account password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-medium text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-blue-600"
+                  className="w-full pl-9 pr-10 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-blue-600"
                 />
-              </div>
-            </div>
-
-            {/* Role Selector */}
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
-                Select Role *
-              </label>
-              <div className="relative">
-                <Shield className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
-                <select
-                  required
-                  value={selectedRole}
-                  onChange={(e) => setSelectedRole(e.target.value as UserRole)}
-                  className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-bold text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-blue-600 cursor-pointer"
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 cursor-pointer"
+                  title={showPassword ? 'Hide password' : 'Show password'}
                 >
-                  <option value="Admin">Admin (Full Control, Reset Passwords, Print Dossier)</option>
-                  <option value="HR">HR Manager (Form A, Form C, Form D Access)</option>
-                  <option value="Staff">Staff (Form A Entry Only - Restricted)</option>
-                </select>
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
-              {selectedRole === 'Staff' && (
-                <p className="text-[10px] text-amber-700 bg-amber-50 rounded p-1.5 mt-1 border border-amber-200">
-                  Staff Role: Restricted to adding Form A records only. Statutory exports, user management, and Form C/D access are disabled.
-                </p>
-              )}
             </div>
 
-            {/* Login Button */}
+            {/* Submit Button */}
             <button
               type="submit"
-              className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-sm cursor-pointer mt-2"
+              className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-sm cursor-pointer mt-4"
             >
+              <Lock className="w-4 h-4" />
               <span>Login to Portal</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
-
-          {/* Quick Demo Fill Buttons */}
-          <div className="mt-6 pt-5 border-t border-slate-200">
-            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block text-center mb-2.5">
-              Quick Role Switch (Demo Credentials)
-            </span>
-            <div className="grid grid-cols-3 gap-2 text-xs">
-              <button
-                type="button"
-                onClick={() => handleQuickFill('admin', 'admin123', 'Admin')}
-                className={`py-1.5 px-2 rounded-lg font-bold border transition-colors cursor-pointer text-center ${
-                  selectedRole === 'Admin'
-                    ? 'bg-rose-50 border-rose-400 text-rose-800'
-                    : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
-                }`}
-              >
-                Admin
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickFill('hr', 'hr123', 'HR')}
-                className={`py-1.5 px-2 rounded-lg font-bold border transition-colors cursor-pointer text-center ${
-                  selectedRole === 'HR'
-                    ? 'bg-amber-50 border-amber-400 text-amber-800'
-                    : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
-                }`}
-              >
-                HR Manager
-              </button>
-              <button
-                type="button"
-                onClick={() => handleQuickFill('staff', 'staff123', 'Staff')}
-                className={`py-1.5 px-2 rounded-lg font-bold border transition-colors cursor-pointer text-center ${
-                  selectedRole === 'Staff'
-                    ? 'bg-blue-50 border-blue-400 text-blue-800'
-                    : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
-                }`}
-              >
-                Staff
-              </button>
-            </div>
-          </div>
         </div>
 
         {/* Footer info */}
@@ -306,16 +254,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({
         </div>
       </div>
 
-      {/* Forgot Password Modal (Admin & HR only) */}
+      {/* Forgot Password by Email Modal */}
       {showForgotModal && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full border border-slate-200 overflow-hidden">
             <div className="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <KeyRound className="w-5 h-5 text-amber-400" />
-                <h3 className="font-bold text-sm">Statutory Account Password Reset</h3>
+                <h3 className="font-bold text-sm">Reset Password by Email</h3>
               </div>
-              <button onClick={closeForgotModal} className="text-slate-400 hover:text-white">
+              <button
+                onClick={closeForgotModal}
+                className="text-slate-400 hover:text-white cursor-pointer"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -328,53 +279,56 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                 </div>
               )}
 
-              {/* Notice that Staff cannot reset password */}
-              <div className="mb-4 p-2.5 bg-blue-50 border border-blue-200 rounded-xl text-blue-900 text-[11px] flex items-start gap-2">
-                <Info className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
-                <div>
-                  <strong>Security Policy:</strong> Password reset via email verification is available exclusively for <strong>Admin</strong> and <strong>HR</strong> roles. Staff must contact Admin.
-                </div>
-              </div>
-
+              {/* Step 1: Enter Username or Email */}
               {forgotStep === 'input' && (
                 <form onSubmit={handleInitiateForgot} className="space-y-4 text-xs">
+                  <p className="text-slate-600 leading-relaxed">
+                    Enter your username or registered email address. We will send a secure 6-digit verification code to your email to verify your identity.
+                  </p>
                   <div>
                     <label className="block font-semibold text-slate-700 mb-1">
-                      Enter Username or Registered Email ID *
+                      Username or Registered Email ID *
                     </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. admin@gloziyo.com or hr"
-                      value={forgotInput}
-                      onChange={(e) => setForgotInput(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-900 focus:ring-2 focus:ring-blue-600 text-sm"
-                    />
+                    <div className="relative">
+                      <Mail className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. admin@gloziyo.com or admin"
+                        value={forgotInput}
+                        onChange={(e) => setForgotInput(e.target.value)}
+                        className="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-xl text-slate-900 focus:ring-2 focus:ring-blue-600 text-sm"
+                      />
+                    </div>
                   </div>
                   <button
                     type="submit"
-                    className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow cursor-pointer flex items-center justify-center gap-2"
+                    className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow cursor-pointer flex items-center justify-center gap-2"
                   >
                     <Send className="w-4 h-4" />
-                    <span>Send Verification Code to Email</span>
+                    <span>Send Verification Code by Email</span>
                   </button>
                 </form>
               )}
 
+              {/* Step 2: OTP Verification & New Password Entry */}
               {forgotStep === 'otp' && matchedForgotUser && (
                 <form onSubmit={handleVerifyOtpAndReset} className="space-y-4 text-xs">
-                  {/* Simulated Dispatch Box */}
+                  {/* Simulated Email Dispatch Box */}
                   <div className="p-3 bg-emerald-50 border border-emerald-300 rounded-xl text-emerald-950 space-y-1">
                     <div className="font-bold flex items-center gap-1.5 text-xs text-emerald-800">
                       <Mail className="w-4 h-4" />
-                      Email &amp; SMS Dispatch Simulated:
+                      Email Verification Dispatched:
                     </div>
                     <p className="text-[11px]">
-                      A 6-digit OTP code was sent to registered email: <strong>{matchedForgotUser.email}</strong> and Mobile: <strong>{matchedForgotUser.mobile}</strong>.
+                      A 6-digit verification code was sent to registered email: <strong>{matchedForgotUser.email}</strong>.
                     </p>
-                    <div className="mt-1 font-mono text-base font-extrabold text-blue-900 bg-white p-1.5 rounded border border-emerald-300 text-center tracking-widest">
+                    <div className="mt-1 font-mono text-base font-extrabold text-blue-900 bg-white p-2 rounded-lg border border-emerald-300 text-center tracking-widest shadow-xs">
                       {simulatedOtp}
                     </div>
+                    <p className="text-[10px] text-emerald-700 text-center">
+                      (Use the 6-digit code above to authenticate)
+                    </p>
                   </div>
 
                   <div>
@@ -401,29 +355,30 @@ export const LoginPage: React.FC<LoginPageProps> = ({
                       required
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-900 font-mono text-sm focus:ring-2 focus:ring-blue-600"
-                      placeholder="New password"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-900 font-mono text-sm focus:ring-2 focus:ring-blue-600 font-bold"
+                      placeholder="Enter new password"
                     />
                   </div>
 
                   <button
                     type="submit"
-                    className="w-full py-2 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow cursor-pointer flex items-center justify-center gap-2"
+                    className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow cursor-pointer flex items-center justify-center gap-2"
                   >
                     <CheckCircle2 className="w-4 h-4" />
-                    <span>Confirm &amp; Reset Password</span>
+                    <span>Confirm &amp; Save New Password</span>
                   </button>
                 </form>
               )}
 
+              {/* Step 3: Success Confirmation */}
               {forgotStep === 'success' && (
                 <div className="text-center py-4 space-y-3">
                   <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
                   <h4 className="text-sm font-extrabold text-slate-900">
-                    Password Successfully Reset!
+                    Password Successfully Saved!
                   </h4>
                   <p className="text-xs text-slate-600">
-                    Your account password has been updated. You can now log in with your new credentials.
+                    Your password has been updated. You can now log in immediately with your new credentials.
                   </p>
                   <button
                     type="button"

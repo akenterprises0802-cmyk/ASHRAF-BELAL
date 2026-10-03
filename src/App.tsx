@@ -161,10 +161,15 @@ export default function App() {
     setUsers((prev) => prev.filter((u) => u.id !== userId));
   };
 
-  const handleResetPassword = (userId: string, newPass: string) => {
+  const handleSetPassword = (userId: string, newPass: string) => {
     setUsers((prev) =>
       prev.map((u) => (u.id === userId ? { ...u, password: newPass } : u))
     );
+    if (currentUser && currentUser.id === userId) {
+      const updated = { ...currentUser, password: newPass };
+      setCurrentUserState(updated);
+      setCurrentUser(updated);
+    }
   };
 
   // If not logged in, show Login Page
@@ -173,7 +178,7 @@ export default function App() {
       <LoginPage
         users={users}
         onLoginSuccess={handleLoginSuccess}
-        onResetPasswordExternal={handleResetPassword}
+        onSetPassword={handleSetPassword}
       />
     );
   }
@@ -186,6 +191,7 @@ export default function App() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onLogout={handleLogout}
+        onSetPassword={handleSetPassword}
       />
 
       {/* Main Content Area */}
@@ -235,7 +241,7 @@ export default function App() {
             currentUser={currentUser}
             onCreateUser={handleCreateUser}
             onDeleteUser={handleDeleteUser}
-            onResetPassword={handleResetPassword}
+            onSetPassword={handleSetPassword}
           />
         )}
       </main>

@@ -3,7 +3,6 @@ import { UserAccount, UserRole } from '../types';
 import {
   Users,
   UserPlus,
-  KeyRound,
   Trash2,
   Mail,
   Phone,
@@ -11,6 +10,8 @@ import {
   Check,
   X,
   AlertCircle,
+  KeyRound,
+  Lock,
 } from 'lucide-react';
 
 interface UserManagementProps {
@@ -18,7 +19,7 @@ interface UserManagementProps {
   currentUser: UserAccount;
   onCreateUser: (user: UserAccount) => void;
   onDeleteUser: (userId: string) => void;
-  onResetPassword: (userId: string, newPass: string) => void;
+  onSetPassword?: (userId: string, newPass: string) => void;
 }
 
 export const UserManagement: React.FC<UserManagementProps> = ({
@@ -26,10 +27,10 @@ export const UserManagement: React.FC<UserManagementProps> = ({
   currentUser,
   onCreateUser,
   onDeleteUser,
-  onResetPassword,
+  onSetPassword,
 }) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [resetModalUserId, setResetModalUserId] = useState<string | null>(null);
+  const [passwordModalUserId, setPasswordModalUserId] = useState<string | null>(null);
   const [newPasswordVal, setNewPasswordVal] = useState('');
   const [statusNotice, setStatusNotice] = useState<string | null>(null);
 
@@ -47,7 +48,12 @@ export const UserManagement: React.FC<UserManagementProps> = ({
     setFormError('');
 
     if (!username.trim() || !fullName.trim() || !email.trim() || !mobile.trim() || !password.trim()) {
-      setFormError('All fields including Email ID and Mobile No are mandatory.');
+      setFormError('All fields including Password are strictly mandatory. All users must be password protected.');
+      return;
+    }
+
+    if (password.trim().length < 4) {
+      setFormError('Password must be at least 4 characters long.');
       return;
     }
 
@@ -68,7 +74,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({
     };
 
     onCreateUser(newUser);
-    setStatusNotice(`User "${newUser.fullName}" (${newUser.role}) created successfully.`);
+    setStatusNotice(`User "${newUser.fullName}" (${newUser.role}) created and password protected.`);
     setIsCreateOpen(false);
     // Reset form
     setUsername('');
@@ -79,14 +85,19 @@ export const UserManagement: React.FC<UserManagementProps> = ({
     setRole('Staff');
   };
 
-  const handleResetSubmit = (e: React.FormEvent) => {
+  const handleSavePassword = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!resetModalUserId || !newPasswordVal.trim()) return;
+    if (!passwordModalUserId || !onSetPassword) return;
 
-    onResetPassword(resetModalUserId, newPasswordVal.trim());
-    const targetUser = users.find((u) => u.id === resetModalUserId);
-    setStatusNotice(`Password reset successfully for ${targetUser?.fullName || 'user'}. Dispatch notification sent to ${targetUser?.email}.`);
-    setResetModalUserId(null);
+    if (!newPasswordVal.trim() || newPasswordVal.trim().length < 4) {
+      alert('Password must be at least 4 characters long.');
+      return;
+    }
+
+    onSetPassword(passwordModalUserId, newPasswordVal.trim());
+    const targetUser = users.find((u) => u.id === passwordModalUserId);
+    setStatusNotice(`Password saved successfully for "${targetUser?.fullName || 'User'}".`);
+    setPasswordModalUserId(null);
     setNewPasswordVal('');
   };
 
@@ -113,7 +124,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({
             </h2>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            Admin rights to create credentials, assign roles (Admin, HR, Staff), reset passwords, and manage access privileges.
+            All users are password-protected. Admin rights to create accounts, assign roles (Admin, HR, Staff), and manage passwords.
           </p>
         </div>
 
@@ -131,7 +142,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({
           <span>{statusNotice}</span>
           <button
             onClick={() => setStatusNotice(null)}
-            className="text-emerald-700 hover:text-emerald-900"
+            className="text-emerald-700 hover:text-emerald-900 cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -142,7 +153,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({
       <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
         <div className="p-4 border-b border-slate-200 bg-slate-50/70 flex items-center justify-between">
           <span className="font-extrabold text-xs text-slate-800 uppercase tracking-wider">
-            Registered System Accounts ({users.length})
+            Password-Protected System Accounts ({users.length})
           </span>
           <span className="text-[11px] text-slate-500">
             Current Session: <strong className="text-blue-900">{currentUser.fullName} ({currentUser.role})</strong>
@@ -153,17 +164,18 @@ export const UserManagement: React.FC<UserManagementProps> = ({
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="bg-slate-100 text-slate-700 font-bold uppercase text-[10px] tracking-wider border-b border-slate-200">
-                <th className="p-3">User</th>
-                <th className="p-3">Role</th>
+                <th className="p-3">User &amp; Username</th>
+                <th className="p-3">Assigned Role</th>
                 <th className="p-3">Email ID</th>
                 <th className="p-3">Mobile No</th>
-                <th className="p-3">Current Password</th>
-                <th className="p-3 text-right">Admin Actions</th>
+                <th className="p-3">Security Status</th>
+                <th className="p-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {users.map((u) => {
                 const isCurrent = u.id === currentUser.id;
+
                 return (
                   <tr key={u.id} className="hover:bg-slate-50 transition-colors">
                     <td className="p-3">
@@ -196,33 +208,38 @@ export const UserManagement: React.FC<UserManagementProps> = ({
                         <span>{u.mobile}</span>
                       </div>
                     </td>
-                    <td className="p-3 font-mono text-slate-600 text-[11px]">
-                      •••••••• <span className="text-[10px] text-slate-400">({u.password})</span>
+                    <td className="p-3 text-[11px]">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200 text-[10px]">
+                        <Lock className="w-3 h-3 text-emerald-600" />
+                        Password Protected
+                      </span>
                     </td>
                     <td className="p-3 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        {/* Admin Reset Password button */}
+                        {/* Change Password Button */}
                         <button
                           onClick={() => {
-                            setResetModalUserId(u.id);
+                            setPasswordModalUserId(u.id);
                             setNewPasswordVal('');
                           }}
-                          className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-bold transition-colors cursor-pointer"
-                          title="Reset Password for this user"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-bold transition-colors cursor-pointer"
+                          title="Change password for this user"
                         >
-                          <KeyRound className="w-3.5 h-3.5 text-blue-600" />
-                          Reset Password
+                          <KeyRound className="w-3 h-3 text-blue-600" />
+                          <span>Change Password</span>
                         </button>
 
                         {/* Admin Delete User button */}
-                        {!isCurrent && (
+                        {!isCurrent ? (
                           <button
                             onClick={() => handleDeleteUser(u.id, u.fullName)}
-                            className="p-1 rounded-lg hover:bg-rose-100 text-rose-600 hover:text-rose-800 transition-colors cursor-pointer"
+                            className="inline-flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-rose-100 text-rose-600 hover:text-rose-800 text-[11px] font-bold transition-colors cursor-pointer"
                             title="Delete User"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
+                        ) : (
+                          <span className="text-[10px] text-slate-400 font-semibold italic">Current User</span>
                         )}
                       </div>
                     </td>
@@ -233,6 +250,66 @@ export const UserManagement: React.FC<UserManagementProps> = ({
           </table>
         </div>
       </div>
+
+      {/* Change Password Modal */}
+      {passwordModalUserId && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full border border-slate-200 overflow-hidden">
+            <div className="bg-slate-900 text-white px-5 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <KeyRound className="w-5 h-5 text-amber-400" />
+                <h3 className="font-bold text-sm">Save New Password</h3>
+              </div>
+              <button
+                onClick={() => setPasswordModalUserId(null)}
+                className="text-slate-400 hover:text-white cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSavePassword} className="p-5 space-y-4 text-xs">
+              <p className="text-slate-600">
+                Set and save new password for user:{' '}
+                <strong className="text-slate-900">
+                  {users.find((u) => u.id === passwordModalUserId)?.fullName}
+                </strong>
+                .
+              </p>
+
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  New Password *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newPasswordVal}
+                  onChange={(e) => setNewPasswordVal(e.target.value)}
+                  placeholder="Enter new password (min. 4 chars)"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-900 font-mono font-bold focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setPasswordModalUserId(null)}
+                  className="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg font-semibold text-slate-700 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold shadow cursor-pointer"
+                >
+                  Save Password
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Create User Modal */}
       {isCreateOpen && (
@@ -245,7 +322,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({
               </div>
               <button
                 onClick={() => setIsCreateOpen(false)}
-                className="text-slate-400 hover:text-white"
+                className="text-slate-400 hover:text-white cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -323,13 +400,15 @@ export const UserManagement: React.FC<UserManagementProps> = ({
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Password *</label>
+                <label className="block font-semibold text-slate-700 mb-1">
+                  Password *
+                </label>
                 <input
                   type="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Create user password"
+                  placeholder="Set mandatory password (min. 4 chars)"
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-900 font-mono focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -348,66 +427,6 @@ export const UserManagement: React.FC<UserManagementProps> = ({
                 >
                   <Check className="w-4 h-4" />
                   Save User
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Admin Reset Password Modal */}
-      {resetModalUserId && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full border border-slate-200 overflow-hidden">
-            <div className="bg-slate-900 text-white px-5 py-4 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <KeyRound className="w-5 h-5 text-amber-400" />
-                <h3 className="font-bold text-sm">Reset User Password</h3>
-              </div>
-              <button
-                onClick={() => setResetModalUserId(null)}
-                className="text-slate-400 hover:text-white"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleResetSubmit} className="p-5 space-y-4 text-xs">
-              <p className="text-slate-600">
-                As Admin, you have rights to reset password for:{' '}
-                <strong className="text-slate-900">
-                  {users.find((u) => u.id === resetModalUserId)?.fullName}
-                </strong>
-                . A reset notification dispatch will also be recorded for their email.
-              </p>
-
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Enter New Password *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={newPasswordVal}
-                  onChange={(e) => setNewPasswordVal(e.target.value)}
-                  placeholder="New password (e.g. gloziyo2024)"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-900 font-mono font-bold focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2 border-t border-slate-200">
-                <button
-                  type="button"
-                  onClick={() => setResetModalUserId(null)}
-                  className="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-lg font-semibold text-slate-700 cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold shadow cursor-pointer"
-                >
-                  Update Password
                 </button>
               </div>
             </form>
