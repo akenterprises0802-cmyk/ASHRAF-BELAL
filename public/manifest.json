@@ -1,0 +1,17 @@
+{
+  "short_name": "Gloziyo Emp",
+  "name": "Gloziyo Services - Employee Statutory Portal",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192 512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0f172a",
+  "theme_color": "#1e3a8a",
+  "display": "standalone",
+  "orientation": "any"
+}

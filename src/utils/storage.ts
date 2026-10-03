@@ -47,266 +47,33 @@ export const INITIAL_USERS: UserAccount[] = [
   },
 ];
 
-export const INITIAL_EMPLOYEES: EmployeeRecord[] = [
-  {
-    id: 'emp_1',
-    srNo: 1,
-    empCode: 'EMP001',
-    name: 'Aamir Farooqui',
-    gender: 'Male',
-    dob: '1990-05-12',
-    designation: 'Site Supervisor',
-    qualification: 'Diploma',
-    category: 'Skilled',
-    mobile: '9876543210',
-    uan: '100987654321',
-    esic: '31000987654321001',
-    lwfNo: 'MH-LWF-45210',
-    pan: 'ABCDE1234F',
-    bankName: 'HDFC Bank',
-    bankAddress: 'Kausa Branch, Thane, MH',
-    accountNo: '50100234567891',
-    ifscCode: 'HDFC0001234',
-    presentAddress: 'Tasmiya Tower, Kausa, Thane 400612',
-    permanentAddress: 'Tasmiya Tower, Kausa, Thane 400612',
-    isSameAddress: true,
-    principalEmployerName: 'Larsen & Toubro Ltd (Metro Project)',
-    principalEmployerAddress: 'Plot No. 4, MIDC Industrial Area, Thane Belapur Road, Navi Mumbai',
-    dateOfJoining: '2020-01-15',
-    dateOfExit: '',
-    reasonOfExit: 'N/A (Active Employee)',
-    status: 'Active',
-    remarks: 'Field site lead supervisor with clean record',
-    photoUrl: DUMMY_PHOTO,
-    signatureUrl: DUMMY_SIGNATURE,
-    documents: {
-      aadhar: { name: 'Aadhar_Aamir.pdf', sizeKb: 65, dataUrl: '#', uploadedAt: '2020-01-15' },
-      pan: { name: 'PAN_Aamir.pdf', sizeKb: 45, dataUrl: '#', uploadedAt: '2020-01-15' },
-      resume: { name: 'Resume_Aamir.pdf', sizeKb: 80, dataUrl: '#', uploadedAt: '2020-01-15' },
-      residence: { name: 'ElectricityBill.pdf', sizeKb: 55, dataUrl: '#', uploadedAt: '2020-01-15' },
-      cheque: { name: 'CancelCheque.pdf', sizeKb: 40, dataUrl: '#', uploadedAt: '2020-01-15' },
-    },
-  },
-  {
-    id: 'emp_2',
-    srNo: 2,
-    empCode: 'EMP002',
-    name: 'Bhavna Kulkarni',
-    gender: 'Female',
-    dob: '1994-08-22',
-    designation: 'HR Executive',
-    qualification: 'Graduate',
-    category: 'Skilled',
-    mobile: '9819012345',
-    uan: '100876543210',
-    esic: '31000876543210002',
-    lwfNo: 'MH-LWF-45211',
-    pan: 'BKULP9876Z',
-    bankName: 'State Bank of India',
-    bankAddress: 'Mumbra Branch, Thane',
-    accountNo: '30495867123',
-    ifscCode: 'SBIN0000456',
-    presentAddress: 'Flat 402, Green Valley, Mumbra, Thane',
-    permanentAddress: 'Flat 402, Green Valley, Mumbra, Thane',
-    isSameAddress: true,
-    principalEmployerName: 'GLOZIYO HEAD OFFICE',
-    principalEmployerAddress: '01A, Tasmiya Tower, Millennium Hospital Compound, Kausa 400612',
-    dateOfJoining: '2021-03-01',
-    dateOfExit: '',
-    reasonOfExit: 'N/A (Active Employee)',
-    status: 'Active',
-    remarks: 'Handling onboarding and statutory compliances',
-    photoUrl: DUMMY_PHOTO,
-    signatureUrl: DUMMY_SIGNATURE,
-    documents: {
-      aadhar: { name: 'Aadhar_Bhavna.pdf', sizeKb: 72, dataUrl: '#', uploadedAt: '2021-03-01' },
-      pan: { name: 'PAN_Bhavna.pdf', sizeKb: 42, dataUrl: '#', uploadedAt: '2021-03-01' },
-      resume: { name: 'Resume_Bhavna.pdf', sizeKb: 88, dataUrl: '#', uploadedAt: '2021-03-01' },
-      residence: { name: 'RentAgreement.pdf', sizeKb: 90, dataUrl: '#', uploadedAt: '2021-03-01' },
-      cheque: { name: 'Cheque_SBI.pdf', sizeKb: 48, dataUrl: '#', uploadedAt: '2021-03-01' },
-    },
-  },
-  {
-    id: 'emp_3',
-    srNo: 3,
-    empCode: 'EMP003',
-    name: 'Chandan Kumar Yadav',
-    gender: 'Male',
-    dob: '1988-11-05',
-    designation: 'Welder',
-    qualification: 'ITI',
-    category: 'Skilled',
-    mobile: '9765432109',
-    uan: '100765432109',
-    esic: '31000765432109003',
-    lwfNo: '',
-    pan: 'CKYPR6543M',
-    bankName: 'Bank of Baroda',
-    bankAddress: 'Kausa Bypass, Thane',
-    accountNo: '24050100012398',
-    ifscCode: 'BARB0KAUSAA',
-    presentAddress: 'Room 12, Chawl No 3, Old Mumbai Pune Highway, Kausa',
-    permanentAddress: 'Vill. Rampur, Dist. Jaunpur, Uttar Pradesh',
-    isSameAddress: false,
-    principalEmployerName: 'Godrej & Boyce Mfg Co Ltd',
-    principalEmployerAddress: 'Pirojshanagar, Vikhroli, Mumbai',
-    dateOfJoining: '2022-07-10',
-    dateOfExit: '2024-01-31',
-    reasonOfExit: 'Resignation by the employee',
-    status: 'Exit',
-    remarks: 'Full and final settlement completed',
-    photoUrl: DUMMY_PHOTO,
-    signatureUrl: DUMMY_SIGNATURE,
-    documents: {
-      aadhar: { name: 'Aadhar_Chandan.pdf', sizeKb: 68, dataUrl: '#', uploadedAt: '2022-07-10' },
-      pan: { name: 'PAN_Chandan.pdf', sizeKb: 45, dataUrl: '#', uploadedAt: '2022-07-10' },
-      resume: { name: 'BioData_Chandan.pdf', sizeKb: 60, dataUrl: '#', uploadedAt: '2022-07-10' },
-      residence: { name: 'RationCard.pdf', sizeKb: 75, dataUrl: '#', uploadedAt: '2022-07-10' },
-      cheque: { name: 'BankPassbook.pdf', sizeKb: 52, dataUrl: '#', uploadedAt: '2022-07-10' },
-    },
-  },
-  {
-    id: 'emp_4',
-    srNo: 4,
-    empCode: 'EMP004',
-    name: 'Dinesh Sawant',
-    gender: 'Male',
-    dob: '1995-02-14',
-    designation: 'Fitter',
-    qualification: 'ITI',
-    category: 'Skilled',
-    mobile: '9821456780',
-    uan: '100654321098',
-    esic: '31000654321098004',
-    lwfNo: 'MH-LWF-45214',
-    pan: 'DSAWP3456L',
-    bankName: 'Kotak Mahindra Bank',
-    bankAddress: 'Thane West',
-    accountNo: '43120987654',
-    ifscCode: 'KKBK0000678',
-    presentAddress: 'Near Millennium Hospital, Kausa 400612',
-    permanentAddress: 'Near Millennium Hospital, Kausa 400612',
-    isSameAddress: true,
-    principalEmployerName: 'Larsen & Toubro Ltd (Metro Project)',
-    principalEmployerAddress: 'Plot No. 4, MIDC Industrial Area, Thane Belapur Road, Navi Mumbai',
-    dateOfJoining: '2022-09-01',
-    dateOfExit: '',
-    reasonOfExit: 'N/A (Active Employee)',
-    status: 'Active',
-    remarks: 'Mechanical assembly operations',
-    photoUrl: DUMMY_PHOTO,
-    signatureUrl: DUMMY_SIGNATURE,
-    documents: {},
-  },
-];
+// Clean empty statutory registers for real production usage (no demo data)
+export const INITIAL_EMPLOYEES: EmployeeRecord[] = [];
 
-export const INITIAL_RECOVERIES: RecoveryRecord[] = [
-  {
-    id: 'rec_1',
-    slNo: 1,
-    empCode: 'EMP001',
-    name: 'Aamir Farooqui',
-    principalEmployer: 'Larsen & Toubro Ltd (Metro Project)',
-    recoveryType: 'Advance',
-    particulars: 'Festival Salary Advance against Festival Allowance',
-    dateOfDamageOrLoss: '2024-04-01',
-    amount: 5000,
-    showCauseIssued: 'Yes',
-    explanationHeard: 'Shabana Khan (HR Manager)',
-    noOfInstalments: 5,
-    firstMonthYear: '2024-04',
-    lastMonthYear: '2024-08',
-    dateOfCompleteRecovery: '2024-08-31',
-    remarks: 'Recovered fully in 5 equal instalments',
-  },
-  {
-    id: 'rec_2',
-    slNo: 2,
-    empCode: 'EMP003',
-    name: 'Chandan Kumar Yadav',
-    principalEmployer: 'Godrej & Boyce Mfg Co Ltd',
-    recoveryType: 'Damage',
-    particulars: 'Tooling damage during machine fabrication',
-    dateOfDamageOrLoss: '2023-10-15',
-    amount: 2500,
-    showCauseIssued: 'Yes',
-    explanationHeard: 'Mohammad Tariq (Admin)',
-    noOfInstalments: 2,
-    firstMonthYear: '2023-11',
-    lastMonthYear: '2023-12',
-    dateOfCompleteRecovery: '2023-12-31',
-    remarks: 'Deducted as per inquiry report with acknowledgment',
-  },
-];
+export const INITIAL_RECOVERIES: RecoveryRecord[] = [];
 
-export const INITIAL_ATTENDANCE: AttendanceRecord[] = [
-  {
-    id: 'att_1',
-    srNo: 1,
-    empCode: 'EMP001',
-    name: 'Aamir Farooqui',
-    placeOfWork: 'Larsen & Toubro Ltd (Metro Project)',
-    dateOfJoining: '2020-01-15',
-    monthText: 'OCTOBER',
-    monthNumber: 10,
-    year: 2024,
-    dailyAttendance: {
-      1: 'P', 2: 'H', 3: 'P', 4: 'P', 5: 'P', 6: 'S', 7: 'P', 8: 'P', 9: 'P', 10: 'P',
-      11: 'P', 12: 'HD', 13: 'S', 14: 'P', 15: 'P', 16: 'P', 17: 'P', 18: 'P', 19: 'P', 20: 'S',
-      21: 'P', 22: 'P', 23: 'P', 24: 'A', 25: 'P', 26: 'P', 27: 'S', 28: 'P', 29: 'P', 30: 'P', 31: 'P'
-    },
-    summaryDays: 25.5,
-    remarksHours: '204 hrs',
-    signatureKeeper: 'Shabana Khan (HR Manager)',
-  },
-  {
-    id: 'att_2',
-    srNo: 2,
-    empCode: 'EMP002',
-    name: 'Bhavna Kulkarni',
-    placeOfWork: 'GLOZIYO HEAD OFFICE',
-    dateOfJoining: '2021-03-01',
-    monthText: 'OCTOBER',
-    monthNumber: 10,
-    year: 2024,
-    dailyAttendance: {
-      1: 'P', 2: 'H', 3: 'P', 4: 'P', 5: 'P', 6: 'S', 7: 'P', 8: 'P', 9: 'P', 10: 'P',
-      11: 'P', 12: 'P', 13: 'S', 14: 'P', 15: 'P', 16: 'P', 17: 'P', 18: 'P', 19: 'P', 20: 'S',
-      21: 'P', 22: 'P', 23: 'P', 24: 'P', 25: 'P', 26: 'P', 27: 'S', 28: 'P', 29: 'P', 30: 'P', 31: 'P'
-    },
-    summaryDays: 26,
-    remarksHours: '208 hrs',
-    signatureKeeper: 'Mohammad Tariq (Admin)',
-  },
-  {
-    id: 'att_3',
-    srNo: 3,
-    empCode: 'EMP004',
-    name: 'Dinesh Sawant',
-    placeOfWork: 'Larsen & Toubro Ltd (Metro Project)',
-    dateOfJoining: '2022-09-01',
-    monthText: 'OCTOBER',
-    monthNumber: 10,
-    year: 2024,
-    dailyAttendance: {
-      1: 'P', 2: 'H', 3: 'P', 4: 'P', 5: 'P', 6: 'S', 7: 'P', 8: 'P', 9: 'P', 10: 'P',
-      11: 'P', 12: 'P', 13: 'S', 14: 'P', 15: 'P', 16: 'P', 17: 'P', 18: 'P', 19: 'P', 20: 'S',
-      21: 'P', 22: 'P', 23: 'P', 24: 'HD', 25: 'P', 26: 'P', 27: 'S', 28: 'P', 29: 'P', 30: 'P', 31: 'P'
-    },
-    summaryDays: 25.5,
-    remarksHours: '204 hrs',
-    signatureKeeper: 'Shabana Khan (HR Manager)',
-  }
-];
+export const INITIAL_ATTENDANCE: AttendanceRecord[] = [];
 
-// Local Storage Keys
+// Local Storage Keys (v_clean represents pristine production state with 0 demo data)
 const USERS_KEY = 'gloziyo_users_v2';
-const EMPLOYEES_KEY = 'gloziyo_employees_v2';
-const RECOVERIES_KEY = 'gloziyo_recoveries_v2';
-const ATTENDANCE_KEY = 'gloziyo_attendance_v3';
+const EMPLOYEES_KEY = 'gloziyo_employees_live_clean';
+const RECOVERIES_KEY = 'gloziyo_recoveries_live_clean';
+const ATTENDANCE_KEY = 'gloziyo_attendance_live_clean';
 const DESIGNATIONS_KEY = 'gloziyo_designations_v2';
 const QUALIFICATIONS_KEY = 'gloziyo_qualifications_v2';
 const CURRENT_USER_KEY = 'gloziyo_current_user_v2';
+
+// Purge legacy demo localStorage caches on load
+try {
+  localStorage.removeItem('gloziyo_employees_v2');
+  localStorage.removeItem('gloziyo_recoveries_v2');
+  localStorage.removeItem('gloziyo_attendance_v3');
+  localStorage.removeItem('gloziyo_employees_v1');
+  localStorage.removeItem('gloziyo_recoveries_v1');
+  localStorage.removeItem('gloziyo_attendance_v1');
+} catch {
+  // Ignore in SSR/restricted environments
+}
 
 export function getStoredUsers(): UserAccount[] {
   try {
