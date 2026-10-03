@@ -1,0 +1,6 @@
+{
+  "name": "Gloziyo Statutory Employee Management System",
+  "description": "Comprehensive Statutory Registers (Form A Employee Register, Form C Recovery Register, Form D Attendance Register) with Role-Based Access, PDF & Excel export, and document management for Gloziyo Services Private Limited.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
